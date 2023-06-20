@@ -1,0 +1,36 @@
+version: '3'
+services:
+  app:
+    container_name: app-django
+    build:
+      context: .
+      dockerfile: data/docker/app/Dockerfile
+    volumes:
+      - ./app:/app
+      - ./data/db:/app/project/db
+    depends_on:
+      - redis
+      - db
+  nginx:
+    container_name: nginx-django
+    image: nginx
+    volumes:
+      - ./data/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8000:80"
+    depends_on:
+      - app
+  redis:
+    container_name: redis-django
+    image: redis
+    volumes:
+      - ./data/redis:/data
+  db:
+    container_name: db-django
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=abracadabra
